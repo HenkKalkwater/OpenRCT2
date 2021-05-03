@@ -1,0 +1,6 @@
+[submodule "thirdparty/speexdsp"]
+	path = thirdparty/speexdsp
+	url = https://gitlab.xiph.org/xiph/speexdsp.git
+[submodule "thirdparty/libzip"]
+	path = thirdparty/libzip
+	url = https://github.com/nih-at/libzip.git

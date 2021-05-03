@@ -70,6 +70,7 @@ CMAKE_DEPENDENT_OPTION(MACOS_BUNDLE "Build macOS application bundle (OpenRCT2.ap
 # Options
 option(STATIC "Create a static build.")
 option(USE_MMAP "Use mmap to try loading rct2's data segment into memory.")
+option(ENABLE_DOWNLOAD_MISSING_LIBS "Enable the downloading of missing libraries at build time, to statically link" OFF)
 
 option(DISABLE_DISCORD_RPC "Disable Discord-RPC support." OFF)
 option(DISABLE_GOOGLE_BENCHMARK "Disable Google Benchmarks support." OFF)
