@@ -93,15 +93,24 @@ sed -i "s/__TIME__/\"Build Service\"/" src/openrct2/Version.h
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$(dirname $(find . -name libopenrct2.so))"
 %make_build g2
 # %%cmake changes directory into "build"
+strip openrct2
+strip libopenrct2.so
 cd ..
+
+
 
 %install
 %make_install
+
+# Correct desktop files
+sed -i "s|Exec=openrct2|Exec=env LD_LIBRARY_PATH=/usr/share/harbour-openrct2/lib harbour-openrct2 --openrct2-data-path=/usr/share/harbour-openrct2|" %{buildroot}%{_datadir}/applications/*.desktop
+sed -i "s/Icon=openrct2/Icon=harbour-openrct2/" %{buildroot}%{_datadir}/applications/*.desktop
 
 # find '%%{buildroot}%%{_datadir}/%{name}' -type f -exec chmod 644 \{\} \;
 
 # We do that in the correct docdir in the files section.
 rm -rf %{buildroot}%{_datadir}/doc
+rm -rf %{buildroot}%{_datadir}/man
 
 # %%fdupes %{buildroot}%{_datadir}/%{name}
 
@@ -110,10 +119,27 @@ mkdir -p %{buildroot}/%{_datadir}/%{name}/bin
 mkdir -p %{buildroot}/%{_datadir}/%{name}/lib
 mv %{buildroot}%{_datadir}/openrct2/* %{buildroot}%{_datadir}/%{name}/
 mv %{buildroot}%{_libdir}/libopenrct2.so %{buildroot}/%{_datadir}/%{name}/lib/libopenrct2.so
-mv %{buildroot}%{_bindir}/openrct2-cli %{buildroot}/%{_datadir}/%{name}/bin/openrct2-cli
+mv %{buildroot}%{_bindir}/openrct2-cli %{buildroot}%{_datadir}/%{name}/bin/openrct2-cli
+mv %{buildroot}%{_bindir}/openrct2 %{buildroot}%{_bindir}/harbour-openrct2
+
+# Rename icons
+pushd %{buildroot}%{_datadir}/icons/hicolor
+for dir in *; do
+	pushd $dir/apps
+	mv openrct2.png harbour-openrct2.png || true
+	mv openrct2.svg harbour-openrct2.svg || true
+	popd
+done
+popd
+
+# Move desktop files
+mv %{buildroot}%{_datadir}/applications/openrct2.desktop %{buildroot}%{_datadir}/applications/harbour-openrct2.desktop
+mv %{buildroot}%{_datadir}/applications/openrct2-savegame.desktop %{buildroot}%{_datadir}/applications/harbour-openrct2-savegame.desktop
+mv %{buildroot}%{_datadir}/applications/openrct2-scenario.desktop %{buildroot}%{_datadir}/applications/harbour-openrct2-scenario.desktop
+mv %{buildroot}%{_datadir}/applications/openrct2-uri.desktop %{buildroot}%{_datadir}/applications/harbour-openrct2-uri.desktop
 
 %files
-%{_bindir}/openrct2
+%{_bindir}/harbour-openrct2
 %{_datadir}/%{name}/bin/openrct2-cli
 %{_datadir}/%{name}/
 %{_datadir}/icons/hicolor/*/apps/*
