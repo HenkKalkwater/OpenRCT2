@@ -475,13 +475,13 @@ public:
                 // Apple sends touchscreen events for trackpads, so ignore these events on macOS
 #ifndef __MACOSX__
                 case SDL_FINGERMOTION:
-                    _cursorState.position = { static_cast<int32_t>(e.tfinger.x * _width),
-                                              static_cast<int32_t>(e.tfinger.y * _height) };
+                    _cursorState.position = { static_cast<int32_t>(e.tfinger.x / gConfigGeneral.window_scale),
+                                              static_cast<int32_t>(e.tfinger.y / gConfigGeneral.window_scale) };
                     break;
                 case SDL_FINGERDOWN:
                 {
-                    ScreenCoordsXY fingerPos = { static_cast<int32_t>(e.tfinger.x * _width),
-                                                 static_cast<int32_t>(e.tfinger.y * _height) };
+                    ScreenCoordsXY fingerPos = { static_cast<int32_t>(e.tfinger.x / gConfigGeneral.window_scale),
+                                                 static_cast<int32_t>(e.tfinger.y / gConfigGeneral.window_scale) };
 
                     _cursorState.touchIsDouble
                         = (!_cursorState.touchIsDouble
@@ -505,8 +505,8 @@ public:
                 }
                 case SDL_FINGERUP:
                 {
-                    ScreenCoordsXY fingerPos = { static_cast<int32_t>(e.tfinger.x * _width),
-                                                 static_cast<int32_t>(e.tfinger.y * _height) };
+                    ScreenCoordsXY fingerPos = { static_cast<int32_t>(e.tfinger.x / gConfigGeneral.window_scale),
+                                                 static_cast<int32_t>(e.tfinger.y / gConfigGeneral.window_scale) };
 
                     if (_cursorState.touchIsDouble)
                     {
@@ -551,7 +551,7 @@ public:
 
                         // Zoom gesture
                         constexpr int32_t tolerance = 128;
-                        int32_t gesturePixels = static_cast<int32_t>(_gestureRadius * _width);
+                        int32_t gesturePixels = static_cast<int32_t>(_gestureRadius / gConfigGeneral.window_scale);
                         if (abs(gesturePixels) > tolerance)
                         {
                             _gestureRadius = 0;
