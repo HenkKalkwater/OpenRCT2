@@ -43,6 +43,18 @@ namespace OpenRCT2
             FULLSCREEN_DESKTOP,
         };
 
+        /**
+         * Window rotation for mobile platforms. Some mobile platforms require the application to
+         * rotate the contents of the window themselves.
+         */
+        enum WINDOW_ROTATION
+        {
+            ROTATE_0,
+            ROTATE_90,
+            ROTATE_180,
+            ROTATE_270,
+        };
+
         inline bool operator<(const Resolution& lhs, const Resolution& rhs)
         {
             int32_t areaA = lhs.Width * lhs.Height;
@@ -103,6 +115,7 @@ namespace OpenRCT2
             virtual void* GetWindow() abstract;
             virtual int32_t GetWidth() abstract;
             virtual int32_t GetHeight() abstract;
+            virtual WINDOW_ROTATION GetWindowRotation() abstract;
             virtual ScaleQuality GetScaleQuality() abstract;
             virtual void SetFullscreenMode(FULLSCREEN_MODE mode) abstract;
             virtual const std::vector<Resolution>& GetFullscreenResolutions() abstract;
