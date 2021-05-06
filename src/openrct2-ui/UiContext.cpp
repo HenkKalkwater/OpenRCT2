@@ -74,7 +74,7 @@ private:
     int32_t _windowWidth = 0;
     int32_t _windowHeight = 0;
     ScaleQuality _scaleQuality = ScaleQuality::NearestNeighbour;
-    DisplayRotation _rotation = DisplayRotation::ROTATE_270;
+    DisplayRotation _rotation = DisplayRotation::ROTATE_90;
 
     std::vector<Resolution> _fsResolutions;
 
@@ -137,6 +137,7 @@ public:
         auto& scriptEngine = GetContext()->GetScriptEngine();
         UiScriptExtensions::Extend(scriptEngine);
 #endif
+        SDL_SetHint(SDL_HINT_QTWAYLAND_CONTENT_ORIENTATION, "landscape");
     }
 
     void Update() override
@@ -392,6 +393,18 @@ public:
                         if (e.window.event == SDL_WINDOWEVENT_FOCUS_LOST)
                         {
                             Mixer_SetVolume(0);
+                        }
+                    }
+                    break;
+                case SDL_DISPLAYEVENT:
+                    if (e.display.type == SDL_DISPLAYEVENT_ORIENTATION)
+                    {
+                        int displayIndex = SDL_GetWindowDisplayIndex(_window);
+                        if (displayIndex == static_cast<int>(e.display.display))
+                        {
+                            int width, height;
+                            SDL_GetWindowSize(_window, &width, &height);
+                            OnResize(width, height);
                         }
                     }
                     break;
@@ -764,6 +777,28 @@ private:
 
     void OnResize(int32_t width, int32_t height)
     {
+        int displayIndex = SDL_GetWindowDisplayIndex(_window);
+        SDL_Rect bounds;
+        SDL_GetDisplayBounds(displayIndex, &bounds);
+        bool isPortrait = bounds.w < bounds.h;
+        switch(SDL_GetDisplayOrientation(displayIndex))
+        {
+        case SDL_DisplayOrientation::SDL_ORIENTATION_UNKNOWN:
+            break;
+        case SDL_DisplayOrientation::SDL_ORIENTATION_LANDSCAPE:
+            _rotation = isPortrait ? ROTATE_90 : ROTATE_0;
+            break;
+        case SDL_DisplayOrientation::SDL_ORIENTATION_LANDSCAPE_FLIPPED:
+            _rotation = isPortrait ? ROTATE_270 : ROTATE_180;
+            break;
+        case SDL_DisplayOrientation::SDL_ORIENTATION_PORTRAIT:
+            _rotation = isPortrait ? ROTATE_0 : ROTATE_270;
+            break;
+        case SDL_DisplayOrientation::SDL_ORIENTATION_PORTRAIT_FLIPPED:
+            _rotation = isPortrait ? ROTATE_0 : ROTATE_270;
+            break;
+        }
+
         _windowWidth = width;
         _windowHeight = height;
         // Scale the native window size to the game's canvas size
@@ -1033,6 +1068,27 @@ private:
             break;
         case OpenRCT2::Ui::ROTATE_270:
             x = 1.0 - y;
+            y = tmpX;
+            break;
+        }
+    }
+    void transformTouchDelta(float &x, float& y)
+    {
+        float tmpX = x;
+        switch (_rotation)
+        {
+        case OpenRCT2::Ui::ROTATE_0:
+            break;
+        case OpenRCT2::Ui::ROTATE_90:
+            x = y;
+            y = -tmpX;
+            break;
+        case OpenRCT2::Ui::ROTATE_180:
+            x = -x;
+            y = -y;
+            break;
+        case OpenRCT2::Ui::ROTATE_270:
+            x = -y;
             y = tmpX;
             break;
         }
