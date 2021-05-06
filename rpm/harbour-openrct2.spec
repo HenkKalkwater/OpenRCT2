@@ -55,9 +55,7 @@ BuildRequires:  shared-mime-info
 BuildRequires:  zip
 #BuildRequires:  pkgconfig(duktape)
 #BuildRequires:  pkgconfig(fontconfig)
-#BuildRequires:  pkgconfig(glesv2)
-BuildRequires:  pkgconfig(icu-uc) >= 59.0
-BuildRequires:  pkgconfig(libcurl)
+#BuildRequires:  pkgconfig(glesv2) BuildRequires:  pkgconfig(icu-uc) >= 59.0 BuildRequires:  pkgconfig(libcurl)
 BuildRequires:  pkgconfig(libpng16)
 BuildRequires:  pkgconfig(openssl) >= 1.0.0
 BuildRequires:  pkgconfig(sdl2)
@@ -103,7 +101,7 @@ cd ..
 %make_install
 
 # Correct desktop files
-sed -i "s|Exec=openrct2|Exec=env LD_LIBRARY_PATH=/usr/share/harbour-openrct2/lib harbour-openrct2 --openrct2-data-path=/usr/share/harbour-openrct2|" %{buildroot}%{_datadir}/applications/*.desktop
+sed -i "s|Exec=openrct2|Exec=env LD_LIBRARY_PATH=/usr/share/harbour-openrct2/lib PULSE_PROP_media.role=x-maemo harbour-openrct2 --openrct2-data-path=/usr/share/harbour-openrct2|" %{buildroot}%{_datadir}/applications/*.desktop
 sed -i "s/Icon=openrct2/Icon=harbour-openrct2/" %{buildroot}%{_datadir}/applications/*.desktop
 
 # find '%%{buildroot}%%{_datadir}/%{name}' -type f -exec chmod 644 \{\} \;
