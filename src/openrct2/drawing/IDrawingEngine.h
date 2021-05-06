@@ -40,10 +40,23 @@ struct GamePalette;
 namespace OpenRCT2::Ui
 {
     struct IUiContext;
+
+    /**
+     * Display rotation for mobile platforms. Some mobile platforms require the application to
+     * rotate the contents of the window themselves.
+     */
+    enum DisplayRotation
+    {
+        ROTATE_0,
+        ROTATE_90,
+        ROTATE_180,
+        ROTATE_270,
+    };
 } // namespace OpenRCT2::Ui
 
 namespace OpenRCT2::Drawing
 {
+
     struct IDrawingContext;
 
     struct IDrawingEngine
@@ -53,7 +66,7 @@ namespace OpenRCT2::Drawing
         }
 
         virtual void Initialise() abstract;
-        virtual void Resize(uint32_t width, uint32_t height) abstract;
+        virtual void Resize(uint32_t width, uint32_t height, Ui::DisplayRotation rotation) abstract;
         virtual void SetPalette(const GamePalette& colours) abstract;
 
         virtual void SetVSync(bool vsync) abstract;

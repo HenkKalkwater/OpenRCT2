@@ -75,7 +75,7 @@ void drawing_engine_resize()
         if (drawingEngine != nullptr)
         {
             auto uiContext = context->GetUiContext();
-            drawingEngine->Resize(uiContext->GetWidth(), uiContext->GetHeight());
+            drawingEngine->Resize(uiContext->GetWidth(), uiContext->GetHeight(), uiContext->GetDisplayRotation());
         }
     }
 }

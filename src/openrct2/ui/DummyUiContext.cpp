@@ -56,6 +56,10 @@ namespace OpenRCT2::Ui
         {
             return 0;
         }
+        DisplayRotation GetDisplayRotation() override
+        {
+            return Ui::ROTATE_0;
+        }
         ScaleQuality GetScaleQuality() override
         {
             return ScaleQuality::NearestNeighbour;

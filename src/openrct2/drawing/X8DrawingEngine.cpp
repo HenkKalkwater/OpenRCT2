@@ -142,8 +142,9 @@ void X8DrawingEngine::Initialise()
 {
 }
 
-void X8DrawingEngine::Resize(uint32_t width, uint32_t height)
+void X8DrawingEngine::Resize(uint32_t width, uint32_t height, Ui::DisplayRotation rotation)
 {
+    _rotation = rotation;
     uint32_t pitch = width;
     ConfigureBits(width, height, pitch);
 }
@@ -197,7 +198,7 @@ void X8DrawingEngine::BeginDraw()
         // HACK we need to re-configure the bits if light fx has been enabled / disabled
         if (_lastLightFXenabled != (gConfigGeneral.enable_light_fx != 0))
         {
-            Resize(_width, _height);
+            Resize(_width, _height, _rotation);
         }
 #endif
         _weatherDrawer.SetDPI(&_bitsDPI);

@@ -35,7 +35,6 @@
 #include <openrct2/config/Config.h>
 #include <openrct2/core/String.hpp>
 #include <openrct2/drawing/Drawing.h>
-#include <openrct2/drawing/IDrawingEngine.h>
 #include <openrct2/interface/Chat.h>
 #include <openrct2/interface/InteractiveConsole.h>
 #include <openrct2/localisation/StringIds.h>
@@ -73,7 +72,7 @@ private:
     int32_t _width = 0;
     int32_t _height = 0;
     ScaleQuality _scaleQuality = ScaleQuality::NearestNeighbour;
-    DRAWING_ENGINE_ROTATION _rotation = ROTATE_90;
+    DisplayRotation _rotation = DisplayRotation::ROTATE_270;
 
     std::vector<Resolution> _fsResolutions;
 
@@ -164,6 +163,11 @@ public:
     int32_t GetHeight() override
     {
         return _height;
+    }
+
+    DisplayRotation GetDisplayRotation() override
+    {
+        return _rotation;
     }
 
     ScaleQuality GetScaleQuality() override
@@ -604,6 +608,7 @@ public:
 
         int32_t width, height;
         SDL_GetWindowSize(_window, &width, &height);
+
         OnResize(width, height);
     }
 
@@ -752,8 +757,17 @@ private:
     void OnResize(int32_t width, int32_t height)
     {
         // Scale the native window size to the game's canvas size
-        _width = static_cast<int32_t>(width / gConfigGeneral.window_scale);
-        _height = static_cast<int32_t>(height / gConfigGeneral.window_scale);
+        if (_rotation == ROTATE_0 || _rotation == ROTATE_180)
+        {
+            _width = static_cast<int32_t>(width / gConfigGeneral.window_scale);
+            _height = static_cast<int32_t>(height / gConfigGeneral.window_scale);
+        }
+        else
+        {
+            _width = static_cast<int32_t>(height / gConfigGeneral.window_scale);
+            _height = static_cast<int32_t>(width / gConfigGeneral.window_scale);
+        }
+
 
         drawing_engine_resize();
 

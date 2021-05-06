@@ -51,7 +51,7 @@ public:
     {
     }
 
-    void Resize(uint32_t width, uint32_t height) override
+    void Resize(uint32_t width, uint32_t height, Ui::DisplayRotation rotation) override
     {
         SDL_FreeSurface(_surface);
         SDL_FreeSurface(_RGBASurface);

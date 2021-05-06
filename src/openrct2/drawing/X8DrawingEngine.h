@@ -71,6 +71,7 @@ namespace OpenRCT2
             uint32_t _width = 0;
             uint32_t _height = 0;
             uint32_t _pitch = 0;
+            Ui::DisplayRotation _rotation = Ui::ROTATE_0;
             size_t _bitsSize = 0;
             uint8_t* _bits = nullptr;
 
@@ -99,7 +100,7 @@ namespace OpenRCT2
 #endif
 
             void Initialise() override;
-            void Resize(uint32_t width, uint32_t height) override;
+            void Resize(uint32_t width, uint32_t height, Ui::DisplayRotation rotation) override;
             void SetPalette(const GamePalette& palette) override;
             void SetVSync(bool vsync) override;
             void Invalidate(int32_t left, int32_t top, int32_t right, int32_t bottom) override;

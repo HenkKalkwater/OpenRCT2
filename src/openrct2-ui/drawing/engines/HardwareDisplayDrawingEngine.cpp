@@ -80,18 +80,21 @@ public:
             _screenTexture = nullptr;
             _scaledScreenTexture = nullptr;
             Initialise();
-            Resize(_uiContext->GetWidth(), _uiContext->GetHeight());
+            Resize(_uiContext->GetWidth(), _uiContext->GetHeight(), _uiContext->GetDisplayRotation());
         }
     }
 
-    void Resize(uint32_t width, uint32_t height) override
+    void Resize(uint32_t width, uint32_t height, Ui::DisplayRotation rotation) override
     {
+        int windowWidth  = static_cast<int>(((_rotation == ROTATE_0 || _rotation == ROTATE_180) ? _width : _height) * gConfigGeneral.window_scale);
+        int windowHeight = static_cast<int>(((_rotation == ROTATE_0 || _rotation == ROTATE_180) ? _height : _width) * gConfigGeneral.window_scale);
+        log_verbose("New (width, height) = (%d, %d)", width, height);
+        log_verbose("New window width, height = (%d, %d)", windowWidth, windowHeight);
         if (width == 0 || height == 0)
         {
             return;
         }
-        uint32_t drawWidth = _rotation == ROTATE_0 || _rotation == ROTATE_180 ? width : height;
-        uint32_t drawHeight = _rotation == ROTATE_0 || _rotation == ROTATE_180 ? height : width;
+        _rotation = rotation;
 
         if (_screenTexture != nullptr)
         {
@@ -138,23 +141,23 @@ public:
             char scaleQualityBuffer[4];
             snprintf(scaleQualityBuffer, sizeof(scaleQualityBuffer), "%u", static_cast<int32_t>(scaleQuality));
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
-            _screenTexture = SDL_CreateTexture(_sdlRenderer, pixelFormat, SDL_TEXTUREACCESS_STREAMING, drawWidth, drawHeight);
+            _screenTexture = SDL_CreateTexture(_sdlRenderer, pixelFormat, SDL_TEXTUREACCESS_STREAMING, width, height);
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, scaleQualityBuffer);
 
             uint32_t scale = std::ceil(gConfigGeneral.window_scale);
             _scaledScreenTexture = SDL_CreateTexture(
-                _sdlRenderer, pixelFormat, SDL_TEXTUREACCESS_TARGET, drawWidth * scale, drawHeight * scale);
+                _sdlRenderer, pixelFormat, SDL_TEXTUREACCESS_TARGET, width * scale, height * scale);
         }
         else
         {
-            _screenTexture = SDL_CreateTexture(_sdlRenderer, pixelFormat, SDL_TEXTUREACCESS_STREAMING, drawWidth, drawHeight);
+            _screenTexture = SDL_CreateTexture(_sdlRenderer, pixelFormat, SDL_TEXTUREACCESS_STREAMING, width, height);
         }
 
         uint32_t format;
         SDL_QueryTexture(_screenTexture, &format, nullptr, nullptr, nullptr);
         _screenTextureFormat = SDL_AllocFormat(format);
 
-        ConfigureBits(drawWidth, drawHeight, drawWidth);
+        ConfigureBits(width, height, width);
     }
 
     void SetPalette(const GamePalette& palette) override
@@ -209,8 +212,6 @@ protected:
 private:
     void Display()
     {
-        uint32_t drawWidth = _rotation == ROTATE_0 || _rotation == ROTATE_180 ? _width : _height;
-        uint32_t drawHeight = _rotation == ROTATE_0 || _rotation == ROTATE_180 ? _height : _width;
 #ifdef __ENABLE_LIGHTFX__
         if (gConfigGeneral.enable_light_fx)
         {
@@ -218,7 +219,7 @@ private:
             int32_t pitch;
             if (SDL_LockTexture(_screenTexture, nullptr, &pixels, &pitch) == 0)
             {
-                lightfx_render_to_texture(pixels, pitch, _bits, drawWidth, drawHeight, _paletteHWMapped, _lightPaletteHWMapped);
+                lightfx_render_to_texture(pixels, pitch, _bits, _width, _height, _paletteHWMapped, _lightPaletteHWMapped);
                 SDL_UnlockTexture(_screenTexture);
             }
         }
@@ -226,26 +227,33 @@ private:
 #endif
         {
             CopyBitsToTexture(
-                _screenTexture, _bits, static_cast<int32_t>(drawWidth), static_cast<int32_t>(drawHeight), _paletteHWMapped);
+                _screenTexture, _bits, static_cast<int32_t>(_width), static_cast<int32_t>(_height), _paletteHWMapped);
         }
 
-        double angle;
-        switch(_rotation)
-            {
-            case ROTATE_0:
-                angle = 0;
-                break;
-            case ROTATE_90:
-                angle = 90;
-                break;
-            case ROTATE_180:
-                angle = 180;
-                break;
-            case ROTATE_270:
-                angle = 270;
-                break;
-            }
+        double angle = .0;
+        int width = static_cast<int>(_width * gConfigGeneral.window_scale);
+        int height = static_cast<int>(_height * gConfigGeneral.window_scale);
 
+        SDL_Rect destRect;
+        switch(_rotation)
+        {
+        case ROTATE_0:
+            destRect = { .x = 0, .y = 0, .w = width, .h = height };
+            angle = 0;
+            break;
+        case ROTATE_90:
+            destRect = { .x = (height - width) / 2, .y = (width - height) / 2, .w = width, .h = height };
+            angle = 90;
+            break;
+        case ROTATE_180:
+            destRect = { .x = 0, .y = 0, .w = width, .h = height };
+            angle = 180;
+            break;
+        case ROTATE_270:
+            destRect = { .x = (height - width) / 2, .y = (width - height) / 2, .w = width, .h = height };
+            angle = 270;
+            break;
+        }
 
         if (smoothNN)
         {
@@ -254,11 +262,11 @@ private:
             SDL_RenderCopy(_sdlRenderer, _screenTexture, nullptr, nullptr);
 
             SDL_SetRenderTarget(_sdlRenderer, nullptr);
-            SDL_RenderCopyEx(_sdlRenderer, _scaledScreenTexture, nullptr, nullptr, angle, nullptr, SDL_FLIP_NONE);
+            SDL_RenderCopyEx(_sdlRenderer, _scaledScreenTexture, nullptr, &destRect, angle, nullptr, SDL_FLIP_NONE);
         }
         else
         {
-            SDL_RenderCopyEx(_sdlRenderer, _screenTexture, nullptr, nullptr, angle, nullptr, SDL_FLIP_NONE);
+            SDL_RenderCopyEx(_sdlRenderer, _screenTexture, nullptr, &destRect, angle, nullptr, SDL_FLIP_NONE);
         }
 
         if (gShowDirtyVisuals)
