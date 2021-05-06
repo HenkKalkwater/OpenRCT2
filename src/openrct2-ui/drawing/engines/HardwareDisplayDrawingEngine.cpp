@@ -90,6 +90,8 @@ public:
         {
             return;
         }
+        uint32_t drawWidth = _rotation == ROTATE_0 || _rotation == ROTATE_180 ? width : height;
+        uint32_t drawHeight = _rotation == ROTATE_0 || _rotation == ROTATE_180 ? height : width;
 
         if (_screenTexture != nullptr)
         {
@@ -136,23 +138,23 @@ public:
             char scaleQualityBuffer[4];
             snprintf(scaleQualityBuffer, sizeof(scaleQualityBuffer), "%u", static_cast<int32_t>(scaleQuality));
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
-            _screenTexture = SDL_CreateTexture(_sdlRenderer, pixelFormat, SDL_TEXTUREACCESS_STREAMING, width, height);
+            _screenTexture = SDL_CreateTexture(_sdlRenderer, pixelFormat, SDL_TEXTUREACCESS_STREAMING, drawWidth, drawHeight);
             SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, scaleQualityBuffer);
 
             uint32_t scale = std::ceil(gConfigGeneral.window_scale);
             _scaledScreenTexture = SDL_CreateTexture(
-                _sdlRenderer, pixelFormat, SDL_TEXTUREACCESS_TARGET, width * scale, height * scale);
+                _sdlRenderer, pixelFormat, SDL_TEXTUREACCESS_TARGET, drawWidth * scale, drawHeight * scale);
         }
         else
         {
-            _screenTexture = SDL_CreateTexture(_sdlRenderer, pixelFormat, SDL_TEXTUREACCESS_STREAMING, width, height);
+            _screenTexture = SDL_CreateTexture(_sdlRenderer, pixelFormat, SDL_TEXTUREACCESS_STREAMING, drawWidth, drawHeight);
         }
 
         uint32_t format;
         SDL_QueryTexture(_screenTexture, &format, nullptr, nullptr, nullptr);
         _screenTextureFormat = SDL_AllocFormat(format);
 
-        ConfigureBits(width, height, width);
+        ConfigureBits(drawWidth, drawHeight, drawWidth);
     }
 
     void SetPalette(const GamePalette& palette) override
@@ -207,6 +209,8 @@ protected:
 private:
     void Display()
     {
+        uint32_t drawWidth = _rotation == ROTATE_0 || _rotation == ROTATE_180 ? _width : _height;
+        uint32_t drawHeight = _rotation == ROTATE_0 || _rotation == ROTATE_180 ? _height : _width;
 #ifdef __ENABLE_LIGHTFX__
         if (gConfigGeneral.enable_light_fx)
         {
@@ -214,7 +218,7 @@ private:
             int32_t pitch;
             if (SDL_LockTexture(_screenTexture, nullptr, &pixels, &pitch) == 0)
             {
-                lightfx_render_to_texture(pixels, pitch, _bits, _width, _height, _paletteHWMapped, _lightPaletteHWMapped);
+                lightfx_render_to_texture(pixels, pitch, _bits, drawWidth, drawHeight, _paletteHWMapped, _lightPaletteHWMapped);
                 SDL_UnlockTexture(_screenTexture);
             }
         }
@@ -222,19 +226,39 @@ private:
 #endif
         {
             CopyBitsToTexture(
-                _screenTexture, _bits, static_cast<int32_t>(_width), static_cast<int32_t>(_height), _paletteHWMapped);
+                _screenTexture, _bits, static_cast<int32_t>(drawWidth), static_cast<int32_t>(drawHeight), _paletteHWMapped);
         }
+
+        double angle;
+        switch(_rotation)
+            {
+            case ROTATE_0:
+                angle = 0;
+                break;
+            case ROTATE_90:
+                angle = 90;
+                break;
+            case ROTATE_180:
+                angle = 180;
+                break;
+            case ROTATE_270:
+                angle = 270;
+                break;
+            }
+
+
         if (smoothNN)
         {
             SDL_SetRenderTarget(_sdlRenderer, _scaledScreenTexture);
+
             SDL_RenderCopy(_sdlRenderer, _screenTexture, nullptr, nullptr);
 
             SDL_SetRenderTarget(_sdlRenderer, nullptr);
-            SDL_RenderCopy(_sdlRenderer, _scaledScreenTexture, nullptr, nullptr);
+            SDL_RenderCopyEx(_sdlRenderer, _scaledScreenTexture, nullptr, nullptr, angle, nullptr, SDL_FLIP_NONE);
         }
         else
         {
-            SDL_RenderCopy(_sdlRenderer, _screenTexture, nullptr, nullptr);
+            SDL_RenderCopyEx(_sdlRenderer, _screenTexture, nullptr, nullptr, angle, nullptr, SDL_FLIP_NONE);
         }
 
         if (gShowDirtyVisuals)
@@ -370,7 +394,9 @@ private:
 
     void ReadCentrePixel(uint32_t* pixel)
     {
-        SDL_Rect centrePixelRegion = { static_cast<int32_t>(_width / 2), static_cast<int32_t>(_height / 2), 1, 1 };
+        uint32_t drawWidth = _rotation == ROTATE_0 || _rotation == ROTATE_180 ? _width : _height;
+        uint32_t drawHeight = _rotation == ROTATE_0 || _rotation == ROTATE_180 ? _height : _width;
+        SDL_Rect centrePixelRegion = { static_cast<int32_t>(drawWidth / 2), static_cast<int32_t>(drawHeight / 2), 1, 1 };
         SDL_RenderReadPixels(_sdlRenderer, &centrePixelRegion, SDL_PIXELFORMAT_RGBA8888, pixel, sizeof(uint32_t));
     }
 

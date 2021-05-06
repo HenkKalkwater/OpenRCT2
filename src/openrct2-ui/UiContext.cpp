@@ -73,6 +73,7 @@ private:
     int32_t _width = 0;
     int32_t _height = 0;
     ScaleQuality _scaleQuality = ScaleQuality::NearestNeighbour;
+    DRAWING_ENGINE_ROTATION _rotation = ROTATE_90;
 
     std::vector<Resolution> _fsResolutions;
 
