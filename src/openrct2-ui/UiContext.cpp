@@ -71,6 +71,8 @@ private:
     SDL_Window* _window = nullptr;
     int32_t _width = 0;
     int32_t _height = 0;
+    int32_t _windowWidth = 0;
+    int32_t _windowHeight = 0;
     ScaleQuality _scaleQuality = ScaleQuality::NearestNeighbour;
     DisplayRotation _rotation = DisplayRotation::ROTATE_270;
 
@@ -394,6 +396,7 @@ public:
                     }
                     break;
                 case SDL_MOUSEMOTION:
+                    transformMouseCoordinates(e.motion.x, e.motion.y);
                     _cursorState.position = { static_cast<int32_t>(e.motion.x / gConfigGeneral.window_scale),
                                               static_cast<int32_t>(e.motion.y / gConfigGeneral.window_scale) };
                     break;
@@ -411,6 +414,7 @@ public:
                     {
                         break;
                     }
+                    transformMouseCoordinates(e.motion.x, e.motion.y);
                     ScreenCoordsXY mousePos = { static_cast<int32_t>(e.button.x / gConfigGeneral.window_scale),
                                                 static_cast<int32_t>(e.button.y / gConfigGeneral.window_scale) };
                     switch (e.button.button)
@@ -447,6 +451,7 @@ public:
                     {
                         break;
                     }
+                    transformMouseCoordinates(e.motion.x, e.motion.y);
                     ScreenCoordsXY mousePos = { static_cast<int32_t>(e.button.x / gConfigGeneral.window_scale),
                                                 static_cast<int32_t>(e.button.y / gConfigGeneral.window_scale) };
                     switch (e.button.button)
@@ -480,11 +485,13 @@ public:
                 // Apple sends touchscreen events for trackpads, so ignore these events on macOS
 #ifndef __MACOSX__
                 case SDL_FINGERMOTION:
+                    transformTouchCoordinates(e.tfinger.x, e.tfinger.y);
                     _cursorState.position = { static_cast<int32_t>(e.tfinger.x * _width),
                                               static_cast<int32_t>(e.tfinger.y * _height) };
                     break;
                 case SDL_FINGERDOWN:
                 {
+                    transformTouchCoordinates(e.tfinger.x, e.tfinger.y);
                     ScreenCoordsXY fingerPos = { static_cast<int32_t>(e.tfinger.x * _width),
                                                  static_cast<int32_t>(e.tfinger.y * _height) };
 
@@ -510,6 +517,7 @@ public:
                 }
                 case SDL_FINGERUP:
                 {
+                    transformTouchCoordinates(e.tfinger.x, e.tfinger.y);
                     ScreenCoordsXY fingerPos = { static_cast<int32_t>(e.tfinger.x * _width),
                                                  static_cast<int32_t>(e.tfinger.y * _height) };
 
@@ -756,6 +764,8 @@ private:
 
     void OnResize(int32_t width, int32_t height)
     {
+        _windowWidth = width;
+        _windowHeight = height;
         // Scale the native window size to the game's canvas size
         if (_rotation == ROTATE_0 || _rotation == ROTATE_180)
         {
@@ -982,6 +992,50 @@ private:
         }
 
         return ie;
+    }
+
+    void transformMouseCoordinates(int &x, int& y)
+    {
+        int tmpX = x;
+        switch (_rotation)
+        {
+        case OpenRCT2::Ui::ROTATE_0:
+            break;
+        case OpenRCT2::Ui::ROTATE_90:
+            x = y;
+            y = _windowWidth - tmpX;
+            break;
+        case OpenRCT2::Ui::ROTATE_180:
+            x = _windowWidth -  x;
+            y = _windowHeight - y;
+            break;
+        case OpenRCT2::Ui::ROTATE_270:
+            x = _windowHeight - y;
+            y = tmpX;
+            break;
+        }
+    }
+
+    void transformTouchCoordinates(float &x, float& y)
+    {
+        float tmpX = x;
+        switch (_rotation)
+        {
+        case OpenRCT2::Ui::ROTATE_0:
+            break;
+        case OpenRCT2::Ui::ROTATE_90:
+            x = y;
+            y = 1.0 - tmpX;
+            break;
+        case OpenRCT2::Ui::ROTATE_180:
+            x = 1.0 -  x;
+            y = 1.0 - y;
+            break;
+        case OpenRCT2::Ui::ROTATE_270:
+            x = 1.0 - y;
+            y = tmpX;
+            break;
+        }
     }
 };
 
