@@ -82,6 +82,7 @@ option(ENABLE_SCRIPTING "Enable script / plugin support." ON)
 if (MINGW)
     option(MINGW_TARGET_NT5_1 "Use only NT5.1 APIs and libraries." OFF)
 endif ()
+option(SAILFISHOS "Compile for SailfishOS target. " OFF)
 
 option(DISABLE_GUI "Don't build GUI. (Headless only.)")
 
@@ -200,6 +201,12 @@ endif ()
 if (ENABLE_SCRIPTING)
     add_definitions(-DENABLE_SCRIPTING)
 endif ()
+
+if (SAILFISHOS)
+    add_definitions(-D__SAILFISHOS__)
+    add_definitions("-DORCT2_RESOURCE_DIR=\"/usr/share/harbour-openrct2\"")
+    set(CMAKE_INSTALL_RPATH "/usr/share/harbour-openrct2/lib")
+endif()
 
 if (NOT DISABLE_DISCORD_RPC)
     if (UNIX AND NOT APPLE)

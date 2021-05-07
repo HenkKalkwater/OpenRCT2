@@ -249,13 +249,22 @@ std::string platform_sanitise_filename(const std::string& path)
 }
 #endif
 
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(__SAILFISHOS__)
 float platform_get_default_scale()
 {
     return 1;
 }
 #endif
 
+#ifndef __SAILFISHOS__
+int platform_get_default_fullsreen_mode()
+{
+    return 0;
+}
+DrawingEngine platform_get_default_drawing_engine() {
+    return DrawingEngine::Software;
+}
+#endif
 void core_init()
 {
     static bool initialised = false;

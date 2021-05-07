@@ -94,7 +94,9 @@ namespace Platform
         prefixes.push_back(GetCurrentWorkingDirectory());
         prefixes.push_back("/");
         static const char* SearchLocations[] = {
+#    ifndef __SAILFISHOS__
             "/data",
+#    endif
             "../share/openrct2",
 #    ifdef ORCT2_RESOURCE_DIR
             // defined in CMakeLists.txt

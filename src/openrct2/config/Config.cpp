@@ -160,7 +160,7 @@ namespace Config
             model->custom_currency_symbol = reader->GetCString("custom_currency_symbol", "Ctm");
             model->edge_scrolling = reader->GetBoolean("edge_scrolling", true);
             model->edge_scrolling_speed = reader->GetInt32("edge_scrolling_speed", 12);
-            model->fullscreen_mode = reader->GetInt32("fullscreen_mode", 0);
+            model->fullscreen_mode = reader->GetInt32("fullscreen_mode", platform_get_default_fullsreen_mode());
             model->fullscreen_height = reader->GetInt32("fullscreen_height", -1);
             model->fullscreen_width = reader->GetInt32("fullscreen_width", -1);
             model->rct1_path = reader->GetCString("rct1_path", nullptr);
@@ -180,7 +180,7 @@ namespace Config
             model->window_width = reader->GetInt32("window_width", -1);
             model->default_display = reader->GetInt32("default_display", 0);
             model->drawing_engine = reader->GetEnum<DrawingEngine>(
-                "drawing_engine", DrawingEngine::Software, Enum_DrawingEngine);
+                "drawing_engine", platform_get_default_drawing_engine(), Enum_DrawingEngine);
             model->uncap_fps = reader->GetBoolean("uncap_fps", false);
             model->use_vsync = reader->GetBoolean("use_vsync", true);
             model->virtual_floor_style = reader->GetEnum<VirtualFloorStyles>(

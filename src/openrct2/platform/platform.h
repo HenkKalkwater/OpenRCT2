@@ -12,6 +12,7 @@
 
 #include "../common.h"
 #include "../config/Config.h"
+#include "../drawing/IDrawingEngine.h"
 
 #include <string>
 #include <time.h>
@@ -131,6 +132,8 @@ bool platform_get_font_path(TTFFontDescriptor* font, utf8* buffer, size_t size);
 datetime64 platform_get_datetime_now_utc();
 
 float platform_get_default_scale();
+int platform_get_default_fullsreen_mode();
+DrawingEngine platform_get_default_drawing_engine();
 
 // Called very early in the program before parsing commandline arguments.
 void core_init();

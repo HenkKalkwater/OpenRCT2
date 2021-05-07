@@ -427,7 +427,7 @@ public:
                     {
                         break;
                     }
-                    transformMouseCoordinates(e.motion.x, e.motion.y);
+                    transformMouseCoordinates(e.button.x, e.button.y);
                     ScreenCoordsXY mousePos = { static_cast<int32_t>(e.button.x / gConfigGeneral.window_scale),
                                                 static_cast<int32_t>(e.button.y / gConfigGeneral.window_scale) };
                     switch (e.button.button)
@@ -464,7 +464,7 @@ public:
                     {
                         break;
                     }
-                    transformMouseCoordinates(e.motion.x, e.motion.y);
+                    transformMouseCoordinates(e.button.x, e.button.y);
                     ScreenCoordsXY mousePos = { static_cast<int32_t>(e.button.x / gConfigGeneral.window_scale),
                                                 static_cast<int32_t>(e.button.y / gConfigGeneral.window_scale) };
                     switch (e.button.button)

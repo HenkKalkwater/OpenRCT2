@@ -85,7 +85,7 @@ sed -i "s/__TIME__/\"Build Service\"/" src/openrct2/Version.h
 	#-DENABLE_DOWNLOAD_MISSING_LIBS=ON -DDISABLE_OPENGL=ON
 
 %cmake -DENABLE_SCRIPTING=OFF -DENABLE_DOWNLOAD_MISSING_LIBS=ON -DDISABLE_OPENGL=ON \
-	-DCMAKE_INSTALL_RPATH=%{_datadir}/%{name}/lib -DORCT2_RESOURCE_DIR="%{_datadir}/%{name}"
+	-DSAILFISHOS=ON
 %make_build all
 # libopenrct2 is not installed when openrct2 is called by make, so set the LD_LIBRARY_PATH
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$(dirname $(find . -name libopenrct2.so))"
